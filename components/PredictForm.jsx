@@ -160,7 +160,7 @@ export default function PredictForm({ apiUrl = "/api/predict", onResult, onLoadi
   `;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-3xl mx-auto">
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mx-auto">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-slate-800">
           Credit Eligibility Form
