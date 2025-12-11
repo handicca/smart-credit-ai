@@ -1,6 +1,10 @@
 export async function POST(req) {
   try {
     const body = await req.json();
+    
+    // simulate processing delay
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // produce plausible fake response
     const rnd = Math.random();
     const risk_score = Math.min(0.95, Math.max(0.02, rnd));
