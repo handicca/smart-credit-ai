@@ -1,42 +1,35 @@
-"use client";
+import DemoPage from "@/components/DemoClient";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import PredictForm from "@/components/PredictForm";
-import ResultCard from "@/components/ResultCard";
+export const metadata = {
+  title: "Credit Eligibility Demo — Smart Credit AI",
+  description:
+    "Try the interactive demo to calculate risk scores, analyze top contributing factors, and view AI-generated credit decisions.",
+  keywords: [
+    "credit scoring demo",
+    "loan calculator",
+    "AI credit risk",
+    "credit assessment tool",
+    "fintech AI demo",
+  ],
+  openGraph: {
+    title: "Smart Credit AI — Live Credit Eligibility Demo",
+    description:
+      "Test the AI model in real-time: submit financial information, get risk scores, see explanations.",
+    url: "https://smart-credit-ai.vercel.app/demo",
+    siteName: "Smart Credit AI",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Smart Credit AI — Credit Eligibility Demo",
+    description: "Interactive risk scoring powered by machine learning.",
+  },
+};
 
-export default function Page() {
-  // hold result returned from API to show in ResultCard
-  const [result, setResult] = useState(null);
-
+export default function page() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        aria-labelledby="demo-form-title"
-      >
-        {/* <h1 id="demo-form-title" className="text-2xl font-bold">
-          Credit Eligibility Demo
-        </h1>
-        <p className="mt-2 text-slate-600">
-          Fill the form to get a risk score, decision and an explanation of top
-          contributing factors.
-        </p> */}
-
-        {/* <div className="mt-6"> */}
-          <PredictForm apiUrl="/api/predict" onResult={setResult} />
-        {/* </div> */}
-      </motion.section>
-
-      <motion.aside
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55 }}
-      >
-        <ResultCard result={result} />
-      </motion.aside>
+    <div>
+      <DemoPage />
     </div>
   );
 }
