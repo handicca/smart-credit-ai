@@ -26,7 +26,7 @@ const formatIDR = (val) => {
   }).format(val);
 };
 
-export default function PredictForm({ apiUrl = "/api/predict", onResult }) {
+export default function PredictForm({ apiUrl = "/api/predict", onResult, onLoadingChange }) {
   const [form, setForm] = useState(INITIAL_STATE);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -82,6 +82,7 @@ export default function PredictForm({ apiUrl = "/api/predict", onResult }) {
     }
 
     setLoading(true);
+    onLoadingChange?.(true)
     onResult?.(null);
 
     try {
@@ -118,6 +119,7 @@ export default function PredictForm({ apiUrl = "/api/predict", onResult }) {
       setStatusMsg(err.message || "Failed to contact server.");
     } finally {
       setLoading(false);
+      onLoadingChange?.(false)
     }
   };
 

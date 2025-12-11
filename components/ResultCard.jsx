@@ -4,11 +4,32 @@ import { motion } from "framer-motion";
 import FeatureChart from "./FeatureChart";
 import RiskGaugePro from "./RiskGaugePro";
 
-export default function ResultCard({ result }) {
+export default function ResultCard({ result, loading }) {
+  if (loading) {
+    return (
+      <div className="p-6 bg-white rounded-xl shadow-md animate-pulse sticky top-16">
+        <div className="h-5 w-40 bg-slate-200 rounded-md" />
+        <div className="mt-4 flex items-start justify-between">
+          <div className="space-y-2">
+            <div className="h-4 w-24 bg-slate-200 rounded-md" />
+            <div className="h-6 w-20 bg-slate-300 rounded-md" />
+          </div>
+
+          <div className="w-28 h-28 bg-slate-200 rounded-full" />
+        </div>
+
+        <div className="mt-6">
+          <div className="h-4 w-40 bg-slate-200 rounded-md" />
+          <div className="mt-3 h-32 w-full bg-slate-200 rounded-md" />
+        </div>
+      </div>
+    );
+  }
+
   // if no result, show a neutral placeholder
   if (!result) {
     return (
-      <div className="p-6 bg-white rounded-xl shadow-md">
+      <div className="p-6 bg-white border-slate-200 border rounded-xl shadow-sm sticky top-16">
         <h3 className="font-semibold">Result preview</h3>
         <div className="mt-3 text-sm text-slate-600">
           No prediction yet. Fill the form to get a result.
@@ -29,7 +50,7 @@ export default function ResultCard({ result }) {
     value: Number(f.importance ?? f.value ?? 0),
   }));
 
-//   const animKey = result ? `${result.risk_score}-${result.decision}` : "empty";
+  //   const animKey = result ? `${result.risk_score}-${result.decision}` : "empty";
 
   return (
     <motion.div
@@ -38,8 +59,12 @@ export default function ResultCard({ result }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: "easeOut" }}
-      whileHover={{ y: -6, scale: 1.01, boxShadow: "0 10px 30px rgba(16,24,40,0.08)" }}
-      className="p-6 bg-white rounded-xl shadow-md"
+      whileHover={{
+        y: -6,
+        scale: 1.01,
+        boxShadow: "0 10px 30px rgba(16,24,40,0.08)",
+      }}
+      className="p-6 bg-white border-slate-200 border rounded-xl shadow-sm sticky top-16"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -57,7 +82,7 @@ export default function ResultCard({ result }) {
         </div>
 
         <div className="w-28">
-          <RiskGaugePro key={risk_score} score={risk_score} size={100}/>
+          <RiskGaugePro key={risk_score} score={risk_score} size={100} />
         </div>
       </div>
 
