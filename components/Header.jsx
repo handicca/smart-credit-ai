@@ -16,7 +16,7 @@ export default function Header() {
             </span>
           </Link>
 
-          {pathname !== "/demo" ? (
+          {pathname === "/" ? (
             <>
               <nav className="hidden md:flex items-center gap-4">
                 <a
