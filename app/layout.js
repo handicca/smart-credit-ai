@@ -51,7 +51,7 @@ export default function RootLayout({ children }) {
         className={`${inter.className} ${inter.variable} flex flex-col min-h-screen antialiased`}
       >
         <Header />
-        <main className="container max-w-6xl mx-auto px-4 lg:px-8 py-10">
+        <main className="container max-w-6xl mx-auto px-4 lg:px-8 py-5 lg:py-10">
           {children}
         </main>
         <Footer />

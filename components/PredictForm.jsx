@@ -1,451 +1,292 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 
-const INITIAL_STATE = {
-  full_name: "",
-  age: "",
-  cibil_score: "",
-  annual_income: "",
-  employment_status: "Employed",
-  employment_length_months: "",
-  dependents: "",
-  total_assets_value: "",
-  other_debt_total: "",
-  loan_amount: "",
-  loan_term_months: "",
-};
+import { INITIAL_FORM } from "@/lib/constants";
+import { buildApiPayload } from "@/lib/helpers";
+import { validateForm } from "@/lib/validators";
+import ModelSelector from "@/components/ModelSelector";
+import CurrencyInputField from "./CurrencyInput";
 
-// Helper untuk formatting Rupiah visual
-const formatIDR = (val) => {
-  if (!val || isNaN(val)) return "";
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(val);
-};
-
-export default function PredictForm({ apiUrl = "/api/predict", onResult, onLoadingChange }) {
-  const [form, setForm] = useState(INITIAL_STATE);
-  const [loading, setLoading] = useState(false);
+export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
+  const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
-
   const firstInputRef = useRef(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setForm((prev) => ({ ...prev, [name]: value }));
+      if (errors[name]) {
+        setErrors((p) => {
+          const n = { ...p };
+          delete n[name];
+          return n;
+        });
+      }
+    },
+    [errors]
+  );
 
-    // Hapus error field saat user mulai memperbaiki
+  const handleCurrencyChange = (name, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [name]: value || "",
+    }));
+
     if (errors[name]) {
       setErrors((prev) => {
-        const newErrs = { ...prev };
-        delete newErrs[name];
-        return newErrs;
+        const next = { ...prev };
+        delete next[name];
+        return next;
       });
     }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    const required = ["age", "cibil_score", "annual_income", "loan_amount"];
-
-    required.forEach((field) => {
-      if (!form[field] && form[field] !== 0) {
-        newErrors[field] = "This field is mandatory";
-      }
-    });
-
-    const age = Number(form.age);
-    if (form.age && (age < 18 || age > 80)) {
-      newErrors.age = "Age must be between 18 - 80 years old";
-    }
-
-    const score = Number(form.cibil_score);
-    if (form.cibil_score && (score < 300 || score > 900)) {
-      newErrors.cibil_score = "CIBIL scores are usually between 300 - 900";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatusMsg("");
+    const validationErrors = validateForm(form);
 
-    if (!validate()) {
-      setStatusMsg("Please correct the input error.");
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+      setStatusMsg("Periksa kembali data yang ditandai.");
       return;
     }
 
     setLoading(true);
-    onLoadingChange?.(true)
-    onResult?.(null);
+    onLoadingChange?.(true);
 
     try {
-      const payload = {
-        full_name: form.full_name || null,
-        age: Number(form.age),
-        cibil_score: Number(form.cibil_score),
-        annual_income: Number(form.annual_income),
-        employment_status: form.employment_status,
-        employment_length_months: Number(form.employment_length_months) || 0,
-        dependents: Number(form.dependents) || 0,
-        total_assets_value: Number(form.total_assets_value) || 0,
-        other_debt_total: Number(form.other_debt_total) || 0,
-        loan_amount: Number(form.loan_amount),
-        loan_term_months: Number(form.loan_term_months) || 12,
-      };
-
       const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(buildApiPayload(form)),
       });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Server Error: ${res.status} - ${text}`);
-      }
 
       const data = await res.json();
       onResult?.(data);
-      setStatusMsg("Prediction successfully calculated!");
+      setStatusMsg("Prediksi kelayakan berhasil dihitung.");
     } catch (err) {
-      console.error(err);
-      setStatusMsg(err.message || "Failed to contact server.");
+      setStatusMsg("Tidak dapat terhubung ke layanan prediksi.");
     } finally {
       setLoading(false);
-      onLoadingChange?.(false)
+      onLoadingChange?.(false);
     }
   };
 
   const handleReset = () => {
-    setForm(INITIAL_STATE);
+    setForm(INITIAL_FORM);
     setErrors({});
     setStatusMsg("");
     onResult?.(null);
     firstInputRef.current?.focus();
   };
 
-  const fillExample = () => {
-    setForm({
-      full_name: "Jane Example",
-      age: "32",
-      cibil_score: "680",
-      annual_income: "120000000",
-      employment_status: "Employed",
-      employment_length_months: "36",
-      dependents: "1",
-      total_assets_value: "500000000",
-      other_debt_total: "10000000",
-      loan_amount: "50000000",
-      loan_term_months: "36",
-    });
-    setErrors({});
-    setStatusMsg("Sample data loaded successfully.");
-  };
-
-  const getInputClass = (fieldName) => `
-    w-full rounded-md border px-3 py-2 text-sm transition-all
-    focus:outline-none focus:ring-2 focus:ring-blue-500/20
-    ${
-      errors[fieldName]
-        ? "border-red-500 bg-red-50"
-        : "border-slate-300 focus:border-blue-500"
-    }
-  `;
+  const inputClass = (f) =>
+    `w-full rounded-lg border px-3 py-2 text-sm transition
+     ${
+       errors[f]
+         ? "border-red-500 bg-red-50"
+         : "border-slate-300 focus:border-blue-500"
+     }`;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mx-auto">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-slate-800">
-          Credit Eligibility Form
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Enter your financial data to calculate the probability of loan
-          approval.
-        </p>
-      </div>
+    <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+      <h1 className="text-xl font-bold text-slate-800">
+        Form Prediksi Kelayakan Kredit
+      </h1>
+      <p className="mt-1 text-sm text-slate-600">
+        Lengkapi data berikut untuk menghitung risiko dan kelayakan kredit.
+      </p>
+      <form onSubmit={handleSubmit} className="space-y-8 mt-6">
+        <ModelSelector
+          value={form.model}
+          onChange={handleChange}
+          inputClass={inputClass}
+        />
 
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"
-      >
-        {/* Name */}
-        <div className="md:col-span-2">
-          <label
-            htmlFor="full_name"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Name (Opsional)
-          </label>
-          <input
-            ref={firstInputRef}
-            id="full_name"
-            name="full_name"
-            value={form.full_name}
-            onChange={handleChange}
-            placeholder="Contoh: Budi Santoso"
-            className={getInputClass("full_name")}
-          />
-        </div>
+        {/* PROFIL PEMOHON */}
+        <section>
+          <h2 className="text-sm font-bold text-slate-700 mb-3">
+            Profil Pemohon
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-600">
+                Pendidikan
+              </label>
+              <select
+                name="education"
+                value={form.education}
+                onChange={handleChange}
+                className={inputClass("education")}
+              >
+                <option value="Graduate">Lulusan Perguruan Tinggi</option>
+                <option value="Not Graduate">
+                  Bukan Lulusan Perguruan Tinggi
+                </option>
+              </select>
+            </div>
 
-        {/* Age */}
-        <div>
-          <label
-            htmlFor="age"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Age <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="age"
-            name="age"
-            type="number"
-            value={form.age}
-            onChange={handleChange}
-            className={getInputClass("age")}
-          />
-          {errors.age && (
-            <p className="text-[10px] text-red-500 mt-1">{errors.age}</p>
-          )}
-        </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">
+                Wirausaha
+              </label>
+              <select
+                name="selfEmployed"
+                value={form.selfEmployed}
+                onChange={handleChange}
+                className={inputClass("selfEmployed")}
+              >
+                <option value="No">Tidak</option>
+                <option value="Yes">Ya</option>
+              </select>
+            </div>
 
-        {/* CIBIL Score */}
-        <div>
-          <label
-            htmlFor="cibil_score"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Score CIBIL (300-900) <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="cibil_score"
-            name="cibil_score"
-            type="number"
-            value={form.cibil_score}
-            onChange={handleChange}
-            className={getInputClass("cibil_score")}
-          />
-          {errors.cibil_score && (
-            <p className="text-[10px] text-red-500 mt-1">
-              {errors.cibil_score}
-            </p>
-          )}
-        </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">
+                Jumlah Tanggungan
+              </label>
+              <input
+                name="dependents"
+                type="number"
+                min="0"
+                value={form.dependents}
+                onChange={handleChange}
+                className={inputClass("dependents")}
+              />
+            </div>
+          </div>
+        </section>
 
-        {/* Annual income */}
-        <div className="md:col-span-2">
-          <label
-            htmlFor="annual_income"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Annual income (IDR) <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="annual_income"
-            name="annual_income"
-            type="number"
-            value={form.annual_income}
-            onChange={handleChange}
-            className={getInputClass("annual_income")}
-          />
-          <p className="text-[10px] text-blue-600 mt-1 h-4">
-            {formatIDR(form.annual_income)}
-          </p>
-          {errors.annual_income && (
-            <p className="text-[10px] text-red-500 mt-1">
-              {errors.annual_income}
-            </p>
-          )}
-        </div>
+        {/* INFORMASI PINJAMAN */}
+        <section>
+          <h2 className="text-sm font-bold text-slate-700 mb-3">
+            Informasi Pinjaman
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CurrencyInputField
+              label="Pendapatan Tahunan"
+              name="annual_income"
+              value={form.annual_income}
+              onValueChange={handleCurrencyChange}
+              error={errors.annual_income}
+              required
+              inputClass={inputClass}
+            />
+            <CurrencyInputField
+              label="Jumlah Pinjaman"
+              name="loan_amount"
+              value={form.loan_amount}
+              onValueChange={handleCurrencyChange}
+              error={errors.loan_amount}
+              required
+              inputClass={inputClass}
+            />
 
-        {/* Employment status */}
-        <div>
-          <label
-            htmlFor="employment_status"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Employment Status
-          </label>
-          <select
-            id="employment_status"
-            name="employment_status"
-            value={form.employment_status}
-            onChange={handleChange}
-            className={getInputClass("employment_status")}
-          >
-            <option value="Employed">Employed</option>
-            <option value="Self-employed">Self-employed</option>
-            <option value="Unemployed">Unemployed</option>
-          </select>
-        </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">
+                Jangka Waktu Pinjaman (tahun)
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                name="loan_term_years"
+                type="number"
+                min="1"
+                value={form.loan_term_years}
+                onChange={handleChange}
+                className={inputClass("loan_term_years")}
+              />
+              {errors.loan_term_years && (
+                <p className="text-xs text-red-500">{errors.loan_term_years}</p>
+              )}
+            </div>
 
-        {/* Employment Length */}
-        <div>
-          <label
-            htmlFor="employment_length_months"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Employment length (months)
-          </label>
-          <input
-            id="employment_length_months"
-            name="employment_length_months"
-            type="number"
-            value={form.employment_length_months}
-            onChange={handleChange}
-            className={getInputClass("employment_length_months")}
-          />
-        </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">
+                Skor Kredit (300 - 900)<span className="text-red-500">*</span>
+              </label>
+              <input
+                name="cibil_score"
+                type="number"
+                value={form.cibil_score}
+                max={900}
+                min={300}
+                onChange={handleChange}
+                className={inputClass("cibil_score")}
+              />
+              {errors.cibil_score && (
+                <p className="text-xs text-red-500">{errors.cibil_score}</p>
+              )}
+            </div>
+          </div>
+        </section>
 
-        {/* Dependents */}
-        <div>
-          <label
-            htmlFor="dependents"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Number of dependents
-          </label>
-          <input
-            id="dependents"
-            name="dependents"
-            type="number"
-            value={form.dependents}
-            onChange={handleChange}
-            className={getInputClass("dependents")}
-          />
-        </div>
+        {/* INFORMASI ASET */}
+        <section>
+          <h2 className="text-sm font-bold text-slate-700 mb-3">
+            Informasi Aset
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CurrencyInputField
+              label="Nilai Aset Rumah"
+              name="residential_assets_value"
+              value={form.residential_assets_value}
+              onValueChange={handleCurrencyChange}
+              inputClass={inputClass}
+            />
 
-        {/* Total assets */}
-        <div>
-          <label
-            htmlFor="total_assets_value"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Total assets value (IDR)
-          </label>
-          <input
-            id="total_assets_value"
-            name="total_assets_value"
-            type="number"
-            value={form.total_assets_value}
-            onChange={handleChange}
-            className={getInputClass("total_assets_value")}
-          />
-          <p className="text-[10px] text-blue-600 mt-1 h-4">
-            {formatIDR(form.total_assets_value)}
-          </p>
-        </div>
+            <CurrencyInputField
+              label="Nilai Aset Usaha"
+              name="commercial_assets_value"
+              value={form.commercial_assets_value}
+              onValueChange={handleCurrencyChange}
+              inputClass={inputClass}
+            />
 
-        {/* Other debt */}
-        <div>
-          <label
-            htmlFor="other_debt_total"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Other total debt (IDR)
-          </label>
-          <input
-            id="other_debt_total"
-            name="other_debt_total"
-            type="number"
-            value={form.other_debt_total}
-            onChange={handleChange}
-            className={getInputClass("other_debt_total")}
-          />
-          <p className="text-[10px] text-blue-600 mt-1 h-4">
-            {formatIDR(form.other_debt_total)}
-          </p>
-        </div>
+            <CurrencyInputField
+              label="Nilai Aset Mewah"
+              name="luxury_assets_value"
+              value={form.luxury_assets_value}
+              onValueChange={handleCurrencyChange}
+              inputClass={inputClass}
+            />
 
-        {/* Loan amount */}
-        <div>
-          <label
-            htmlFor="loan_amount"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Requested loan amount (IDR) <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="loan_amount"
-            name="loan_amount"
-            type="number"
-            value={form.loan_amount}
-            onChange={handleChange}
-            className={getInputClass("loan_amount")}
-          />
-          <p className="text-[10px] text-blue-600 mt-1 h-4">
-            {formatIDR(form.loan_amount)}
-          </p>
-          {errors.loan_amount && (
-            <p className="text-[10px] text-red-500 mt-1">
-              {errors.loan_amount}
-            </p>
-          )}
-        </div>
-
-        {/* Loan term */}
-        <div>
-          <label
-            htmlFor="loan_term_months"
-            className="block text-[11px] font-bold text-slate-500 uppercase mb-1"
-          >
-            Loan term (months)
-          </label>
-          <input
-            id="loan_term_months"
-            name="loan_term_months"
-            type="number"
-            value={form.loan_term_months}
-            onChange={handleChange}
-            placeholder="12"
-            className={getInputClass("loan_term_months")}
-          />
-        </div>
+            <CurrencyInputField
+              label="Saldo / Aset Bank"
+              name="bank_asset_value"
+              value={form.bank_asset_value}
+              onValueChange={handleCurrencyChange}
+              inputClass={inputClass}
+            />
+          </div>
+        </section>
 
         {/* Action */}
-        <div className="md:col-span-2 flex flex-wrap items-center gap-3 mt-4 pt-6 border-t border-slate-100">
+        <section className="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 disabled:opacity-50 transition-all"
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
           >
-            {loading ? "Processing..." : "Predict Eligibility"}
+            {loading ? "Memproses..." : "Prediksi Kelayakan"}
           </button>
 
           <button
             type="button"
             onClick={handleReset}
-            className="px-6 py-2.5 text-sm font-medium border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            className="px-6 py-2.5 rounded-lg border border-slate-600 text-sm hover:bg-slate-50 cursor-pointer"
           >
             Reset
           </button>
+        </section>
 
-          <button
-            type="button"
-            onClick={fillExample}
-            className="text-xs text-blue-600 font-semibold hover:underline ml-auto"
-          >
-            Use Example Data
-          </button>
-        </div>
-
-        {/* Pesan Status */}
         {statusMsg && (
-          <div
-            className={`md:col-span-2 p-3 rounded-lg text-sm font-medium ${
-              statusMsg.includes("berhasil")
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-amber-50 text-amber-700 border border-amber-200"
-            }`}
-          >
+          <p className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-sm font-semibold text-amber-800">
             {statusMsg}
-          </div>
+          </p>
         )}
       </form>
     </div>

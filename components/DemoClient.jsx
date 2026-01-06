@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import PredictForm from "@/components/PredictForm";
 import ResultCard from "@/components/ResultCard";
 
-
 export default function DemoPage() {
   // hold result returned from API to show in ResultCard
   const [result, setResult] = useState(null);
@@ -19,17 +18,11 @@ export default function DemoPage() {
         transition={{ duration: 0.45 }}
         aria-labelledby="demo-form-title"
       >
-        {/* <h1 id="demo-form-title" className="text-2xl font-bold">
-          Credit Eligibility Demo
-        </h1>
-        <p className="mt-2 text-slate-600">
-          Fill the form to get a risk score, decision and an explanation of top
-          contributing factors.
-        </p> */}
-
-        {/* <div className="mt-6"> */}
-          <PredictForm apiUrl="/api/predict" onResult={setResult} onLoadingChange={setLoading} />
-        {/* </div> */}
+        <PredictForm
+          apiUrl="/api/predict"
+          onResult={setResult}
+          onLoadingChange={setLoading}
+        />
       </motion.section>
 
       <motion.aside

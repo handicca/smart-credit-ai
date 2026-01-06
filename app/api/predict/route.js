@@ -1,29 +1,48 @@
 export async function POST(req) {
   try {
     const body = await req.json();
-    
-    // simulate processing delay
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // produce plausible fake response
-    const rnd = Math.random();
-    const risk_score = Math.min(0.95, Math.max(0.02, rnd));
-    const features = [
-      { name: "Debt-to-income ratio", importance: 0.42 },
-      { name: "CIBIL score", importance: 0.31 },
-      { name: "Employment length", importance: 0.12 },
-    ];
-    const decision = risk_score > 0.5 ? "Rejected" : "Approved";
-    const message =
-      decision === "Approved"
-        ? "Applicant appears credit worthy based on provided data."
-        : "Higher debt-to-income ratio increases risk; consider lowering requested amount.";
+    const model = body.model || "xgboost";
 
+    const baseUrl = process.env.PREDICT_API_BASE_URL;
+
+    const endpoint =
+      model === "logreg"
+        ? process.env.PREDICT_LOGREG_ENDPOINT
+        : model === "random_forest"
+        ? process.env.PREDICT_RF_ENDPOINT
+        : process.env.PREDICT_XGBOOST_ENDPOINT;
+
+    const backendRes = await fetch(`${baseUrl}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (!backendRes.ok) {
+      const text = await backendRes.text();
+      return new Response(JSON.stringify({ error: text }), {
+        status: backendRes.status,
+      });
+    }
+
+    const rawData = await backendRes.json();
+    // console.log("RAW BACKEND DATA:", rawData);
+
+    const result = Array.isArray(rawData) ? rawData[0] : rawData;
+
+    return Response.json({
+      model: result.model ?? model,
+      decision: result.status,
+      prediction_label: result.prediction_label ?? null,
+      confidence: result.confidence,
+      ratio_aset_pinjaman: result.ratio_aset_pinjaman,
+    });
+  } catch (error) {
+    console.error("Predict API error:", error);
     return new Response(
-      JSON.stringify({ decision, risk_score, features, message }),
-      { status: 200 }
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500 }
     );
-  } catch (err) {
-    return new Response("Bad request", { status: 400 });
   }
 }
