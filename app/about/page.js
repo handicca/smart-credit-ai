@@ -14,8 +14,8 @@ export default function AboutPage() {
       id: "B25B9D003",
       description:
         "Membangun REST API, integrasi model, pipeline pemrosesan data, dokumentasi, dan koordinasi tim",
-      github: "https://github.com/username",
-      linkedin: "https://linkedin.com/in/username",
+      github: "https://github.com/UmarFarukManek",
+      linkedin: "https://linkedin.com/in/umar-faruq-manek-92b17a292",
     },
     {
       name: "Abdillah Husein Sanjani",
@@ -30,8 +30,8 @@ export default function AboutPage() {
       id: "B25B9D008",
       description:
         "Analisis data, cleaning data, visualisasi data, dan validasi data.",
-      github: "https://github.com/username",
-      linkedin: "https://linkedin.com/in/username",
+      github: "https://github.com/RezaGnwn",
+      linkedin: "https://linkedin.com/in/rezagnwn",
     },
     {
       name: "Handika",
