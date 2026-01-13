@@ -7,6 +7,7 @@ import { buildApiPayload } from "@/lib/helpers";
 import { validateForm } from "@/lib/validators";
 import ModelSelector from "@/components/ModelSelector";
 import CurrencyInputField from "./CurrencyInput";
+import { InfoTooltip, Tooltip } from "./InfoTooltip";
 
 export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -112,16 +113,17 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
           <h2 className="text-sm font-bold text-slate-700 mb-3">
             Profil Pemohon
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             <div>
               <label className="text-xs font-semibold text-slate-600">
                 Pendidikan
               </label>
+              <InfoTooltip content={"Tingkat pendidikan digunakan sebagai indikator stabilitas pekerjaan dan kemampuan finansial jangka panjang."}/>
               <select
                 name="education"
                 value={form.education}
                 onChange={handleChange}
-                className={inputClass("education")}
+                className={`${inputClass("education")} text-slate-800`}
               >
                 <option value="Graduate">Lulusan Perguruan Tinggi</option>
                 <option value="Not Graduate">
@@ -134,11 +136,16 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               <label className="text-xs font-semibold text-slate-600">
                 Wirausaha
               </label>
+              <InfoTooltip
+                content={
+                  "Status wirausaha membantu sistem menilai kestabilan dan konsistensi sumber pendapatan pemohon."
+                }
+              />
               <select
                 name="selfEmployed"
                 value={form.selfEmployed}
                 onChange={handleChange}
-                className={inputClass("selfEmployed")}
+                className={`${inputClass("selfEmployed")} text-slate-800`}
               >
                 <option value="No">Tidak</option>
                 <option value="Yes">Ya</option>
@@ -149,13 +156,18 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               <label className="text-xs font-semibold text-slate-600">
                 Jumlah Tanggungan
               </label>
+              <InfoTooltip
+                content={
+                  "Jumlah orang yang secara finansial menjadi tanggungan pemohon. Semakin banyak tanggungan, semakin besar beban finansial."
+                }
+              />
               <input
                 name="dependents"
                 type="number"
                 min="0"
                 value={form.dependents}
                 onChange={handleChange}
-                className={inputClass("dependents")}
+                className={`${inputClass("dependents")} text-slate-800`}
               />
             </div>
           </div>
@@ -175,6 +187,9 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               error={errors.annual_income}
               required
               inputClass={inputClass}
+              tooltipContent={
+                "Total pendapatan kotor pemohon dalam satu tahun. Digunakan untuk menilai kemampuan membayar pinjaman."
+              }
             />
             <CurrencyInputField
               label="Jumlah Pinjaman"
@@ -184,20 +199,28 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               error={errors.loan_amount}
               required
               inputClass={inputClass}
+              tooltipContent={
+                "Total dana yang diajukan untuk dipinjam oleh pemohon."
+              }
             />
 
             <div>
               <label className="text-xs font-semibold text-slate-600">
-                Jangka Waktu Pinjaman (tahun)
+                Waktu Pinjaman (tahun)
                 <span className="text-red-500">*</span>
               </label>
+              <InfoTooltip
+                content={
+                  "Durasi pinjaman dalam satuan tahun. Jangka waktu yang lebih panjang dapat menurunkan cicilan, tetapi meningkatkan risiko kredit."
+                }
+              />
               <input
                 name="loan_term_years"
                 type="number"
                 min="1"
                 value={form.loan_term_years}
                 onChange={handleChange}
-                className={inputClass("loan_term_years")}
+                className={`${inputClass("dependents")} text-slate-800`}
               />
               {errors.loan_term_years && (
                 <p className="text-xs text-red-500">{errors.loan_term_years}</p>
@@ -208,6 +231,11 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               <label className="text-xs font-semibold text-slate-600">
                 Skor Kredit (300 - 900)<span className="text-red-500">*</span>
               </label>
+              <InfoTooltip
+                content={
+                  "Skor kredit mencerminkan riwayat pembayaran dan perilaku keuangan pemohon. Skor yang lebih tinggi menunjukkan risiko kredit yang lebih rendah."
+                }
+              />
               <input
                 name="cibil_score"
                 type="number"
@@ -215,7 +243,7 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
                 max={900}
                 min={300}
                 onChange={handleChange}
-                className={inputClass("cibil_score")}
+                className={`${inputClass("dependents")} text-slate-800`}
               />
               {errors.cibil_score && (
                 <p className="text-xs text-red-500">{errors.cibil_score}</p>
@@ -236,6 +264,9 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               value={form.residential_assets_value}
               onValueChange={handleCurrencyChange}
               inputClass={inputClass}
+              tooltipContent={
+                "Perkiraan nilai properti tempat tinggal yang dimiliki oleh pemohon."
+              }
             />
 
             <CurrencyInputField
@@ -244,6 +275,9 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               value={form.commercial_assets_value}
               onValueChange={handleCurrencyChange}
               inputClass={inputClass}
+              tooltipContent={
+                "Perkiraan nilai aset yang berkaitan dengan kegiatan usaha pemohon, seperti peralatan atau inventaris."
+              }
             />
 
             <CurrencyInputField
@@ -252,6 +286,9 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               value={form.luxury_assets_value}
               onValueChange={handleCurrencyChange}
               inputClass={inputClass}
+              tooltipContent={
+                "Perkiraan nilai aset bernilai tinggi yang dimiliki pemohon, seperti kendaraan mewah atau barang berharga lainnya."
+              }
             />
 
             <CurrencyInputField
@@ -260,6 +297,9 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
               value={form.bank_asset_value}
               onValueChange={handleCurrencyChange}
               inputClass={inputClass}
+              tooltipContent={
+                "Total saldo tabungan atau rekening bank yang dimiliki oleh pemohon."
+              }
             />
           </div>
         </section>
@@ -277,7 +317,7 @@ export default function PredictForm({ apiUrl, onResult, onLoadingChange }) {
           <button
             type="button"
             onClick={handleReset}
-            className="px-6 py-2.5 rounded-lg border border-slate-600 text-sm hover:bg-slate-50 cursor-pointer"
+            className="px-6 py-2.5 text-slate-800 rounded-lg border border-slate-600 text-sm hover:bg-slate-50 cursor-pointer"
           >
             Reset
           </button>

@@ -9,7 +9,7 @@ export default function Hero() {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <div>
-        <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
+        <h1 className="text-4xl text-slate-800 sm:text-5xl font-extrabold leading-tight">
           Faster decisions. Fairer outcomes.
         </h1>
         <p className="mt-4 text-slate-600 max-w-prose">

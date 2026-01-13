@@ -19,11 +19,11 @@ export default function Features() {
       id="features"
       className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm"
     >
-      <h3 className="text-xl font-semibold">Mengapa Smart Credit?</h3>
+      <h3 className="text-xl text-slate-800 font-semibold">Mengapa Smart Credit?</h3>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         {ITEMS.map((it, idx) => (
           <div key={idx} className="p-4 rounded-lg">
-            <h4 className="font-semibold">
+            <h4 className="text-slate-800 font-semibold">
               <span className="text-blue-600 font-bold pr-2">✓</span>
               {it.title}
             </h4>

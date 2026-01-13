@@ -5,7 +5,7 @@ export default function CTA() {
     <section className="rounded-lg p-6 bg-linear-to-r from-blue-50 to-transparent">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <h4 className="text-lg font-semibold">Siap mencoba Smart Credit?</h4>
+          <h4 className="text-lg text-slate-800 font-semibold">Siap mencoba Smart Credit?</h4>
           <p className="text-sm text-slate-600">
             Coba demo untuk melihat bagaimana keputusan dijelaskan.
           </p>

@@ -19,7 +19,7 @@ export default function HowItWorks() {
       id="how-it-works"
       className="bg-white border border-slate-100 rounded-lg p-6 shadow-sm"
     >
-      <h3 className="text-xl font-semibold">How it works</h3>
+      <h3 className="text-xl text-slate-800 font-semibold">How it works</h3>
 
       <ol className="mt-4 space-y-3">
         {STEPS.map((s, i) => (
@@ -28,7 +28,7 @@ export default function HowItWorks() {
               {i + 1}
             </div>
             <div>
-              <h4 className="font-medium">{s.title}</h4>
+              <h4 className="font-medium text-slate-800">{s.title}</h4>
               <p className="text-sm text-slate-600 mt-1">{s.desc}</p>
             </div>
           </li>

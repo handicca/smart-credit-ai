@@ -1,10 +1,12 @@
 import CurrencyInput from "react-currency-input-field";
+import { InfoTooltip } from "./InfoTooltip";
 
 export default function CurrencyInputField({
   label,
   name,
   value,
   onValueChange,
+  tooltipContent,
   error,
   inputClass,
   required = false,
@@ -15,7 +17,7 @@ export default function CurrencyInputField({
         {label}
         {required && <span className="text-red-500">*</span>}
       </label>
-
+      <InfoTooltip content={tooltipContent}/>
       <CurrencyInput
         name={name}
         value={value}
@@ -30,7 +32,7 @@ export default function CurrencyInputField({
         decimalSeparator=","
         allowDecimals={false}
         allowNegativeValue={false}
-        className={inputClass(name)}
+        className={`${inputClass(name)} text-slate-800`}
       />
 
       {error && (

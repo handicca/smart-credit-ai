@@ -15,7 +15,7 @@ export default function ModelSelector({ value, onChange, inputClass }) {
             name="model"
             value={value}
             onChange={onChange}
-            className={inputClass("model")}
+            className={`${inputClass("model")} text-slate-800`}
           >
             {MODELS.map((model) => (
               <option key={model.value} value={model.value}>

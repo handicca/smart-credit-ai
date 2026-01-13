@@ -80,7 +80,7 @@ export default function AboutPage() {
     <section className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="max-w-3xl">
-        <h1 className="text-5xl font-bold text-slate-800">
+        <h1 className="text-4xl text-slate-800 sm:text-5xl font-extrabold leading-tight">
           Tentang Smart Credit AI
         </h1>
         <p className="mt-4 text-slate-600 leading-relaxed">
