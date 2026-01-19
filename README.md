@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Smart Credit AI
 
-## Getting Started
+<p align="center">
+  <img src="app/favicon.ico" alt="Smart Credit AI icon" width="96" height="96" />
+</p>
 
-First, run the development server:
+**Smart Credit AI** is a web app for running **credit eligibility** and **risk scoring** predictions using selectable ML models, with a clean UI and charts to help interpret results.
+
+## Tech stack
+
+- **Framework**: Next.js (App Router)
+- **UI**: React, Tailwind CSS
+- **Animation**: Framer Motion
+- **Charts**: Recharts
+- **Linting**: ESLint (Next.js config)
+
+## Requirements
+
+- **Node.js**: recommended 18+ (or 20+)
+- **npm** (project includes `package-lock.json`)
+
+## Setup
+
+1) Install dependencies
+
+```bash
+npm install
+```
+
+2) Create `.env.local` in the project root (required for predictions)
+
+```bash
+# Base URL of your prediction backend (example)
+PREDICT_API_BASE_URL=http://localhost:8000
+
+# Backend endpoints (paths) for each model
+PREDICT_XGBOOST_ENDPOINT=/predict/xgboost
+PREDICT_RF_ENDPOINT=/predict/random-forest
+PREDICT_LOGREG_ENDPOINT=/predict/logreg
+```
+
+## Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## How to use the app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Home**: landing page (`/`)
+- **Demo**: interactive prediction form (`/demo`)
+  - Choose a model (**xgboost**, **random_forest**, **logreg**)
+  - Fill in applicant + loan + asset information
+  - Submit to get decision + confidence + asset/loan ratio
 
-## Learn More
+## API
 
-To learn more about Next.js, take a look at the following resources:
+- **POST** ` /api/predict`
+  - Proxies to your configured backend using `PREDICT_API_BASE_URL` + the selected model endpoint.
+  - The UI posts form data to this route, so you usually only need to configure env vars.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Production
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run build
+npm run start
+```
 
-## Deploy on Vercel
+## Project structure (high level)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`app/`**: routes, layout, API route (`app/api/predict/route.js`)
+- **`components/`**: UI components (form, gauges, charts)
+- **`lib/`**: constants + payload building + validation
